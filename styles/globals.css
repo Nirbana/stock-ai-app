@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f5f7fa;
+  --foreground: #1a202c;
+  --chat-bg: #ffffff;
+  --chat-fg: #1a202c;
+  --user-bubble: #3B82F6;
+  --user-text: #ffffff;
+  --bot-bubble: #e5e7eb;
+  --bot-text: #1a202c;
+  --input-bg: #f3f4f6;
+  --border: #e2e8f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111827;
+    --foreground: #f3f4f6;
+    --chat-bg: #1f2937;
+    --chat-fg: #f3f4f6;
+    --user-bubble: #3B82F6;
+    --user-text: #ffffff;
+    --bot-bubble: #374151;
+    --bot-text: #f3f4f6;
+    --input-bg: #374151;
+    --border: #4b5563;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #__next {
+  height: 100%;
+}
+
+input, button {
+  font-family: inherit;
+}
+
+@layer components {
+  .chat-window {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
+
+  .chat-window::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-window::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .chat-window::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.5);
+    border-radius: 3px;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
