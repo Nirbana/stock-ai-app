@@ -21,21 +21,29 @@ export default function ChatApp() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+  
     if (input.trim() === '') return;
-
-    // Add user message
+  
     const userMessage = { text: input, sender: 'user' };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
-
-    // Clear the input field
     setInput('');
-
-    // Simulate bot response
-    setTimeout(() => {
-      const botMessage = { text: `Hey! did you just say: ${input}` +'? ', sender: 'bot' };
-      setMessages((prevMessages) => [...prevMessages, botMessage]);
-    }, 1000);  // Simulate delay for bot response
+  
+    fetch('/api/message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: input }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const botMessage = { text: data.reply, sender: 'bot' };
+        setMessages((prevMessages) => [...prevMessages, botMessage]);
+      })
+      .catch(() => {
+        const errorMessage = { text: 'Error talking to the bot. Try again.', sender: 'bot' };
+        setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      });
   };
 
   return (

@@ -15,6 +15,7 @@
     "framer-motion": "^12.10.5",
     "next": "15.3.2",
     "postcss": "^8.5.3",
+    "puppeteer": "^24.8.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
