@@ -1,11 +1,13 @@
 'use client';  // Required to make the component work in the new App Router (Next.js 13+)
 
 import { useState, useRef, useEffect } from 'react';
+//const [isTyping, setIsTyping] = useState(false);
 
 export default function ChatApp() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,6 +29,7 @@ export default function ChatApp() {
     const userMessage = { text: input, sender: 'user' };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInput('');
+    setIsTyping(true); // start typing indicator
   
     fetch('/api/message', {
       method: 'POST',
@@ -37,103 +40,96 @@ export default function ChatApp() {
     })
       .then((res) => res.json())
       .then((data) => {
-        const botMessage = { text: data.reply, sender: 'bot' };
+        const botMessage = { ...data.reply, sender: 'bot' };
+        console.log('🤖 botMessage', botMessage);
         setMessages((prevMessages) => [...prevMessages, botMessage]);
       })
       .catch(() => {
         const errorMessage = { text: 'Error talking to the bot. Try again.', sender: 'bot' };
         setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      })
+      .finally(() => {
+        setIsTyping(false); // stop typing indicator
       });
   };
+  
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden shadow-xl">
-    {/* Header with Logo */}
-    <div className="bg-white dark:bg-gray-800 py-3 px-6 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex flex-col sm:flex-row items-center">
-        <div className="flex items-center space-x-4 w-full justify-center sm:justify-start">
-          {/* Stock chart section */}
-          <div className="w-24 flex-shrink-0">
-            <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20,70 L50,40 L80,60 L110,30 L140,50 L170,20" 
-                    stroke="#4885ed" 
-                    strokeWidth="8" 
-                    fill="none" 
-                    strokeLinecap="round"
-                    strokeLinejoin="round" />
-              <circle cx="170" cy="20" r="8" fill="#4885ed" />
-            </svg>
-          </div>
-          
-          {/* Circuit symbol */}
-          <div className="w-16 flex-shrink-0">
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="50" cy="50" r="25" fill="none" stroke="#4885ed" strokeWidth="5" />
-              <circle cx="50" cy="50" r="12" fill="none" stroke="#4885ed" strokeWidth="5" />
-              <line x1="50" y1="25" x2="50" y2="15" stroke="#4885ed" strokeWidth="5" />
-              <line x1="50" y1="75" x2="50" y2="85" stroke="#4885ed" strokeWidth="5" />
-              <line x1="25" y1="50" x2="15" y2="50" stroke="#4885ed" strokeWidth="5" />
-              <line x1="75" y1="50" x2="85" y2="50" stroke="#4885ed" strokeWidth="5" />
-            </svg>
-          </div>
-          
-          {/* Text */}
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-bold text-blue-500 dark:text-blue-400">Stock Sage</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Your AI Trading Partner</p>
-          </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#eaeaea] px-4 py-6">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden">
+        
+        {/* Header */}
+        <div className="bg-[#1e1e1e] text-white px-6 py-4">
+          <h1 className="text-xl font-semibold">Rank Scout AI</h1>
+          <p className="text-sm text-gray-300">Your friendly SEO audit assistant</p>
         </div>
-      </div>
-    </div>
-
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500 dark:text-gray-400 text-center">
-              Ask a question about stocks to get started
-            </p>
-          </div>
-        ) : (
-          messages.map((message, index) => (
-            <div 
-              key={index} 
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div 
-                className={`max-w-3/4 px-4 py-3 rounded-lg ${
-                  message.sender === 'user' 
-                    ? 'bg-blue-600 text-white rounded-br-none' 
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-none'
-                }`}
+  
+        {/* Chat messages */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#f9f9f9] transition-all duration-300">
+          {messages.length === 0 ? (
+            <p className="text-gray-500 text-center">Ask about your page SEO to get started</p>
+          ) : (
+            messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {message.text}
+                {message.type === 'cards' ? (
+                  <div className="flex flex-col gap-2 w-full max-w-sm">
+                    {message.data.map((card, i) => (
+                      <div
+                        key={i}
+                        className="bg-white border border-gray-200 p-4 rounded-xl shadow-sm"
+                      >
+                        <p className="text-sm text-gray-700">{card}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div
+                    className={`px-4 py-3 rounded-lg max-w-sm ${
+                      message.sender === 'user'
+                        ? 'bg-blue-600 text-white rounded-br-none'
+                        : 'bg-gray-200 text-gray-800 rounded-bl-none'
+                    }`}
+                  >
+                    {message.data ?? message.text}
+                  </div>
+                )}
               </div>
-            </div>
-          ))
+            ))
+          )}
+          <div ref={messagesEndRef} />
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="bg-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg animate-pulse">
+                Typing...
+              </div>
+          </div>
         )}
-        <div ref={messagesEndRef} />
-      </div>
-      
-      {/* Input Area */}
-      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex space-x-2">
+        </div>
+  
+        {/* Input */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white border-t border-gray-200 p-4 flex gap-3"
+        >
           <input
             type="text"
             value={input}
             onChange={handleInputChange}
-            onKeyPress={(e) => e.key === 'Enter' && handleSubmit(e)}
-            placeholder="Ask about stocks..."
-            className="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 border border-transparent focus:border-blue-500 dark:focus:border-blue-400 rounded-full text-gray-800 dark:text-gray-200 focus:outline-none"
+            placeholder="Paste a URL or ask something..."
+            className="flex-1 px-4 py-2 rounded-full bg-gray-100 border border-gray-300 text-sm"
           />
-          <button 
-            onClick={handleSubmit}
-            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-full focus:outline-none transition-colors duration-200"
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-blue-700"
           >
             Send
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
+  
 }
